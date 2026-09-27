@@ -414,7 +414,8 @@ function runReviewMarquee() {
   window.addEventListener("load", measure);
 
   rows.forEach((r) => {
-    r.el.addEventListener("pointerenter", () => { r.target = 0; });
+    // mouse only: a tap on touch screens shouldn't freeze the row
+    r.el.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") r.target = 0; });
     r.el.addEventListener("pointerleave", () => { r.target = 1; });
   });
 
@@ -491,6 +492,7 @@ function splitManifesto() {
 function initScrollFX() {
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const bar = $("#scrollProgress");
+  const narrow = window.matchMedia("(max-width: 560px)");
   const floats = calm ? [] : $$("[data-speed]");
   const words = splitManifesto();
   const manifesto = $("#manifesto");
@@ -504,7 +506,7 @@ function initScrollFX() {
     const max = document.documentElement.scrollHeight - vh;
     bar?.style.setProperty("--p", max > 0 ? (y / max).toFixed(4) : 0);
 
-    floats.forEach((el) => {
+    if (!narrow.matches) floats.forEach((el) => {
       const r = el.parentElement.getBoundingClientRect();
       if (r.bottom < -200 || r.top > vh + 200) return;
       el.style.setProperty("--py", `${((r.top + r.height / 2 - vh / 2) * +el.dataset.speed).toFixed(1)}px`);
